@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { EpiCurveLab, DetectionLab, AttackRateLab, OutbreakResources } from "./OutbreakLab.jsx";
 
 /* ============================================================
    DESIGN TOKENS
@@ -1003,6 +1004,10 @@ function OutbreakTopic({ onBack }) {
     >
       <OutbreakCurveQuiz />
       <OutbreakStepsOrdering />
+      <EpiCurveLab />
+      <AttackRateLab />
+      <DetectionLab />
+      <OutbreakResources />
     </TopicShell>
   );
 }
@@ -1015,7 +1020,7 @@ const TOPICS = [
   { id: "interaction", title: "اینتراکشن", desc: "تفاوت تعدیل‌کنندگی اثر با کانفاندینگ، با مثال عددی", tag: "تعاملی" },
   { id: "measures", title: "اندازه‌های ارتباط", desc: "محاسبه‌گر زنده‌ی RR، OR، RD و AR٪ از جدول ۲×۲", tag: "محاسبه‌گر" },
   { id: "designs", title: "انواع مطالعات و طراحی پژوهش", desc: "سناریوهای واقعی بخوانید و نوع طراحی مطالعه را تشخیص دهید", tag: "سناریومحور" },
-  { id: "outbreak", title: "طغیان‌ها و بررسی اپیدمی", desc: "تشخیص نوع منحنی اپیدمی و چیدن مراحل صحیح بررسی طغیان", tag: "سناریومحور" },
+  { id: "outbreak", title: "طغیان‌ها و بررسی اپیدمی", desc: "نوع منحنی، مراحل بررسی، آزمایشگاه منحنی اپیدمی، میزان حمله غذایی و کشف زودهنگام", tag: "سناریومحور" },
 ];
 
 function Home({ onOpen }) {

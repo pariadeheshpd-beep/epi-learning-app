@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پرسشنامه طغیان خوابگاه</title>
+<style>
+  :root {
+    --ink: #24291f; --ink2: #3b4a2f; --muted: #6f7466; --line: #dfe3d8; --bg: #ffffff; --soft: #f2f4ee;
+    --accent: #b5532f; --ok: #3e7c5a; --err: #b3261e; --blue: #3e7c8c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: Vazirmatn, Tahoma, "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.7; }
+  header { background: var(--ink2); color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 700; }
+  header .sub { font-size: 13px; opacity: .8; }
+  .bar { height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: #e6c46a; transition: width .25s; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px 16px 120px; }
+  h2 { font-size: 19px; margin: 8px 0 14px; }
+  .q { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #fff; }
+  .q.hidden { display: none; }
+  .q label.title { display: block; font-weight: 700; margin-bottom: 6px; }
+  .q .req { color: var(--accent); margin-inline-start: 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin: -2px 0 8px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { position: relative; }
+  .opt input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .opt span { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--soft); cursor: pointer; user-select: none; }
+  .opt input:checked + span { background: var(--ink2); color: #fff; border-color: var(--ink2); }
+  .opt input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+  input[type=text], input[type=time], select { font: inherit; padding: 9px 11px; border: 1px solid #c9cec0; border-radius: 10px; width: 100%; max-width: 260px; background: #fff; color: var(--ink); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row select { max-width: 160px; }
+  .err { color: var(--err); font-size: 13px; margin-top: 6px; display: none; }
+  .q.invalid { border-color: var(--err); }
+  .q.invalid .err { display: block; }
+  table.foods { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.foods th, table.foods td { padding: 8px 4px; border-bottom: 1px solid var(--line); text-align: center; }
+  table.foods th:first-child, table.foods td:first-child { text-align: right; }
+  table.foods input { width: 20px; height: 20px; accent-color: var(--ink2); }
+  table.foods tr.missing td:first-child { color: var(--err); font-weight: 700; }
+  .logic { display: none; direction: ltr; text-align: left; font-family: "Courier New", monospace; font-size: 12px; background: #f6f3ea; border: 1px dashed #cdbf96; border-radius: 8px; padding: 6px 8px; margin-top: 8px; white-space: pre-wrap; color: #5a4a1e; }
+  body.teach .logic { display: block; }
+  nav.foot { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--line); padding: 10px 16px; display: flex; gap: 10px; justify-content: center; z-index: 5; }
+  button { font: inherit; border: 0; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
+  .btn { background: var(--ink2); color: #fff; }
+  .btn.alt { background: var(--soft); color: var(--ink); border: 1px solid var(--line); }
+  .btn.warn { background: #fff; color: var(--err); border: 1px solid #e6b9b5; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .card { background: var(--soft); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .stack { display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+  .big { font-size: 28px; font-weight: 700; }
+  .pill { display: inline-block; background: var(--ink2); color: #fff; border-radius: 999px; padding: 2px 12px; font-size: 14px; }
+  .switch { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  textarea { width: 100%; height: 160px; direction: ltr; font-family: "Courier New", monospace; font-size: 12px; }
+  .ar { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+  .ar th, .ar td { border-bottom: 1px solid var(--line); padding: 7px 5px; text-align: center; white-space: nowrap; }
+  .ar th:first-child, .ar td:first-child { text-align: right; }
+  .ar tr.top td { background: #f7e7df; font-weight: 700; }
+  .scroll { overflow-x: auto; }
+  .hist { display: flex; align-items: flex-end; gap: 3px; height: 150px; border-bottom: 1px solid var(--ink); padding-top: 10px; direction: ltr; }
+  .hist div { flex: 1; background: var(--blue); position: relative; min-width: 8px; }
+  .hist div b { position: absolute; top: -18px; left: 0; right: 0; text-align: center; font-size: 11px; font-weight: 400; color: var(--ink); }
+  .hx { display: flex; gap: 3px; direction: ltr; font-size: 10px; color: var(--muted); }
+  .hx span { flex: 1; text-align: center; min-width: 8px; }
+  .toast { position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 8px 16px; border-radius: 999px; font-size: 14px; display: none; z-index: 9; }
+</style>
+</head>
+<body>
+<header>
+  <h1>پرسشنامه طغیان گاستروانتریت خوابگاه</h1>
+  <div class="sub" id="hsub">فرم آفلاین · بدون نیاز به اینترنت</div>
+  <div class="bar"><i id="prog"></i></div>
+</header>
+<main id="app"></main>
+<nav class="foot" id="foot"></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+// ======================= helpers =======================
+const FA_DIG = "۰۱۲۳۴۵۶۷۸۹", AR_DIG = "٠١٢٣٤٥٦٧٨٩";
+const toEn = (s) => String(s ?? "").replace(/[۰-۹]/g, (d) => FA_DIG.indexOf(d)).replace(/[٠-٩]/g, (d) => AR_DIG.indexOf(d)).trim();
+const toFa = (s) => String(s).replace(/\d/g, (d) => FA_DIG[d]);
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(() => (t.style.display = "none"), 2200); }
+
+// storage (may be unavailable on file:// or private mode)
+const STORE_KEY = "dorm_outbreak_records_v1";
+let memRecords = [];
+function loadRecords() { try { const v = localStorage.getItem(STORE_KEY); if (v) return JSON.parse(v); } catch (e) {} return memRecords; }
+function saveRecords(arr) { memRecords = arr; try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); return true; } catch (e) { return false; } }
+
+// Jalali window for the scenario: 10 Esfand 1404 .. 18 Farvardin 1405
+// 1 Esfand 1404 = 2026-02-20 ; 1 Farvardin 1405 = 2026-03-21
+const MONTHS = [{ v: "esfand", t: "اسفند ۱۴۰۴", days: 29, min: 10, base: "2026-02-20" }, { v: "farvardin", t: "فروردین ۱۴۰۵", days: 31, max: 18, base: "2026-03-21" }];
+function jalaliToIso(m, d) {
+  const M = MONTHS.find((x) => x.v === m); if (!M || !d) return "";
+  const dt = new Date(M.base + "T00:00:00Z"); dt.setUTCDate(dt.getUTCDate() + (Number(d) - 1));
+  return dt.toISOString().slice(0, 10);
+}
+
+// ======================= form definition =======================
+// Each question mirrors a row of the XLSForm (same names) so the data matches.
+const YN = [["yes", "بله"], ["no", "خیر"]];
+const YND = [["yes", "بله"], ["no", "خیر"], ["dk", "یادم نیست"]];
+const FOODS = [["rice", "برنج"], ["kebab", "کباب کوبیده"], ["chicken", "جوجه‌کباب"], ["salad", "سالاد شیرازی"], ["yogurt", "ماست"], ["doogh", "دوغ"], ["dessert", "ژله و دسر"], ["water", "آب لوله‌کشی یا یخ"]];
+const SYMPTOMS = [["diarrhea", "اسهال"], ["vomiting", "استفراغ"], ["nausea", "تهوع"], ["cramps", "دل‌درد"], ["fever", "تب"], ["headache", "سردرد"], ["bloody", "خون در مدفوع"]];
+const V = {}; // current answers
+
+const PAGES = [
+  { title: "رضایت", qs: [
+    { name: "intro", type: "note", label: "این پرسشنامه برای بررسی طغیان گاستروانتریت پس از شام ۱۴ اسفند ۱۴۰۴ در خوابگاه است. پاسخ‌ها محرمانه می‌ماند." },
+    { name: "consent", type: "select_one", label: "آیا مایل به شرکت در این بررسی هستید؟", opts: YN, required: true },
+  ]},
+  { title: "بخش ۱: اطلاعات فردی", rel: () => V.consent === "yes", relTxt: "${consent} = 'yes'", qs: [
+    { name: "age", type: "integer", label: "سن (سال)", required: true, con: (v) => v >= 15 && v <= 90, conTxt: ". >= 15 and . <= 90", msg: "سن باید بین ۱۵ و ۹۰ سال باشد." },
+    { name: "sex", type: "select_one", label: "جنس", opts: [["male", "مرد"], ["female", "زن"]], required: true },
+    { name: "residence", type: "select_one", label: "محل سکونت یا کار", opts: [["dorm_a", "خوابگاه الف"], ["dorm_b", "خوابگاه ب"], ["staff", "کارکنان خوابگاه یا آشپزخانه"], ["other", "سایر"]], required: true },
+    { name: "room", type: "text", label: "شماره اتاق", hint: "فقط عدد اتاق را وارد کنید، مثلاً ۲۱۴.", required: true,
+      rel: () => V.residence === "dorm_a" || V.residence === "dorm_b", relTxt: "${residence} = 'dorm_a' or ${residence} = 'dorm_b'",
+      con: (v) => /^[0-9]{1,4}$/.test(v), conTxt: "regex(., '^[0-9]{1,4}$')", msg: "فقط عدد وارد کنید (حداکثر ۴ رقم)." },
+    { name: "location", type: "geopoint", label: "موقعیت محل سکونت (اختیاری)", hint: "اگر در محل سکونت هستید، دکمه را بزنید. برای نقشه طغیان استفاده می‌شود." },
+  ]},
+  { title: "بخش ۲: شام ۱۴ اسفند", rel: () => V.consent === "yes", relTxt: "${consent} = 'yes'", qs: [
+    { name: "attended", type: "select_one", label: "آیا در شام ۱۴ اسفند (پنجشنبه شب) در سالن غذاخوری حضور داشتید؟", opts: YND, required: true },
+    { name: "foods", type: "foods", label: "از کدام غذاها خوردید؟", hint: "برای هر غذا یک گزینه را بزنید.", required: true,
+      rel: () => V.attended === "yes", relTxt: "${attended} = 'yes'   (group, appearance: field-list / table)" },
+    { name: "other_meal", type: "select_one", label: "در ۳ روز قبل از شروع علائم، بیرون از خوابگاه غذا خورده‌اید؟", opts: YN,
+      rel: () => !!V.attended, relTxt: "${attended} != ''" },
+  ]},
+  { title: "بخش ۳: بیماری", rel: () => V.consent === "yes", relTxt: "${consent} = 'yes'", qs: [
+    { name: "ill", type: "select_one", label: "از ۱۴ اسفند تاکنون اسهال یا استفراغ داشته‌اید؟", opts: YN, required: true },
+    { name: "symptoms", type: "select_multiple", label: "کدام علائم را داشتید؟", hint: "همه موارد را انتخاب کنید.", opts: SYMPTOMS, required: true,
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'" },
+    { name: "diarrhea_n", type: "integer", label: "در بدترین روز، چند بار اسهال داشتید؟", required: true,
+      rel: () => V.ill === "yes" && (V.symptoms || []).includes("diarrhea"), relTxt: "selected(${symptoms}, 'diarrhea')",
+      con: (v) => v >= 1 && v <= 30, conTxt: ". >= 1 and . <= 30", msg: "عددی بین ۱ و ۳۰ وارد کنید." },
+    { name: "onset_date", type: "jdate", label: "تاریخ شروع اولین علامت", required: true,
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'",
+      conTxt: ". >= date('2026-03-01') and . <= date('2026-04-07')   (10 Esfand .. 18 Farvardin)", msg: "تاریخ باید بین ۱۰ اسفند ۱۴۰۴ و ۱۸ فروردین ۱۴۰۵ باشد." },
+    { name: "onset_time", type: "time", label: "ساعت تقریبی شروع اولین علامت", hint: "اگر دقیق نمی‌دانید، نزدیک‌ترین ساعت را بزنید.",
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'" },
+    { name: "duration_h", type: "integer", label: "علائم چند ساعت طول کشید؟",
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'", con: (v) => v >= 1 && v <= 720, conTxt: ". >= 1 and . <= 720", msg: "عددی بین ۱ و ۷۲۰ ساعت وارد کنید." },
+    { name: "sought_care", type: "select_one", label: "برای این بیماری به پزشک یا مرکز درمانی مراجعه کردید؟", opts: YN,
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'" },
+    { name: "hospitalized", type: "select_one", label: "بستری شدید؟", opts: YN,
+      rel: () => V.ill === "yes" && V.sought_care === "yes", relTxt: "${sought_care} = 'yes'" },
+    { name: "ill_roommates", type: "integer", label: "چند نفر از هم‌اتاقی‌ها یا اعضای خانواده‌تان هم بیمار شدند؟",
+      rel: () => V.ill === "yes", relTxt: "${ill} = 'yes'", con: (v) => v >= 0 && v <= 20, conTxt: ". >= 0 and . <= 20", msg: "عددی بین ۰ و ۲۰ وارد کنید." },
+  ]},
+  { title: "جمع‌بندی", summary: true, qs: [] },
+];
+
+// ======================= calculations (XLSForm calculate rows) =======================
+function calc() {
+  const sym = V.symptoms || [];
+  let status = "";
+  if (V.ill === "yes") status = ((Number(V.diarrhea_n) || 0) >= 3 || (sym.includes("vomiting") && sym.includes("diarrhea"))) ? "case_v1" : "case_v2";
+  else if (V.ill === "no") status = "non_case";
+  let inc = "";
+  if (V.attended === "yes" && V.ill === "yes" && V.onset_date && V.onset_time) {
+    const t = new Date(`${V.onset_date}T${V.onset_time}:00+03:30`), d = new Date("2026-03-05T20:00:00+03:30");
+    inc = Math.round(((t - d) / 3600000) * 10) / 10;
+  }
+  return { case_status: status, incubation_h: inc };
+}
+const CASE_FA = { case_v1: "مورد (تعریف ۱: دست‌کم ۳ بار اسهال، یا اسهال همراه استفراغ)", case_v2: "مورد خفیف (فقط با تعریف ۲)", non_case: "غیرمورد", "": "—" };
+
+// ======================= rendering =======================
+let page = 0, startTime = null, mode = "home";
+function visiblePages() { return PAGES.map((p, i) => i).filter((i) => !PAGES[i].rel || PAGES[i].rel()); }
+function isRel(q) { return !q.rel || q.rel(); }
+
+function logicBox(q, p) {
+  const parts = [`name: ${q.name}`, `type: ${q.type === "jdate" ? "date" : q.type === "foods" ? "select_one yes_no_dk (x8)" : q.type}`];
+  if (q.required) parts.push("required: yes");
+  if (q.relTxt) parts.push(`relevant: ${q.relTxt}`);
+  if (q.conTxt) parts.push(`constraint: ${q.conTxt}`);
+  return `<div class="logic">${esc(parts.join("\n"))}</div>`;
+}
+
+function optInputs(q, multi) {
+  const cur = V[q.name];
+  return `<div class="opts">${q.opts.map(([v, t]) => {
+    const chk = multi ? (cur || []).includes(v) : cur === v;
+    return `<label class="opt"><input type="${multi ? "checkbox" : "radio"}" name="${q.name}" value="${v}" ${chk ? "checked" : ""}><span>${t}</span></label>`;
+  }).join("")}</div>`;
+}
+
+function renderQ(q) {
+  const req = q.required ? `<span class="req" aria-hidden="true">*</span>` : "";
+  const hint = q.hint ? `<div class="hint">${q.hint}</div>` : "";
+  let body = "";
+  if (q.type === "note") return `<div class="q" id="q_${q.name}"><div>${q.label}</div>${logicBox(q)}</div>`;
+  if (q.type === "select_one") body = optInputs(q, false);
+  else if (q.type === "select_multiple") body = optInputs(q, true);
+  else if (q.type === "integer" || q.type === "text") body = `<input type="text" inputmode="${q.type === "integer" || q.name === "room" ? "numeric" : "text"}" name="${q.name}" value="${esc(V[q.name] ?? "")}" autocomplete="off">`;
+  else if (q.type === "time") body = `<input type="time" name="${q.name}" value="${esc(V[q.name] ?? "")}">`;
+  else if (q.type === "jdate") {
+    const m = V.onset_m || "", d = V.onset_d || "";
+    const M = MONTHS.find((x) => x.v === m);
+    const days = M ? Array.from({ length: M.days }, (_, i) => i + 1).filter((x) => (!M.min || x >= M.min) && (!M.max || x <= M.max)) : [];
+    body = `<div class="row"><select name="onset_m" aria-label="ماه"><option value="">ماه…</option>${MONTHS.map((x) => `<option value="${x.v}" ${x.v === m ? "selected" : ""}>${x.t}</option>`).join("")}</select>
+      <select name="onset_d" aria-label="روز" ${M ? "" : "disabled"}><option value="">روز…</option>${days.map((x) => `<option value="${x}" ${String(x) === String(d) ? "selected" : ""}>${toFa(x)}</option>`).join("")}</select></div>`;
+  } else if (q.type === "geopoint") {
+    const g = V.location ? `ثبت شد: ${toFa(V.location.lat.toFixed(5))}، ${toFa(V.location.lon.toFixed(5))}` : "ثبت نشده";
+    body = `<div class="row"><button type="button" class="btn alt" id="gpsbtn">ثبت موقعیت</button><span class="muted" id="gpsmsg">${g}</span></div>`;
+  } else if (q.type === "foods") {
+    const f = V.foods || {};
+    body = `<table class="foods"><thead><tr><th>غذا</th><th>بله</th><th>خیر</th><th>یادم نیست</th></tr></thead><tbody>${FOODS.map(([k, t]) =>
+      `<tr data-food="${k}"><td>${t}</td>${YND.map(([v]) => `<td><input type="radio" name="f_${k}" value="${v}" aria-label="${t}: ${v}" ${f[k] === v ? "checked" : ""}></td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  return `<div class="q" id="q_${q.name}"><label class="title">${q.label}${req}</label>${hint}${body}<div class="err" id="e_${q.name}"></div>${logicBox(q)}</div>`;
+}
+
+function render() {
+  const app = $("#app"), foot = $("#foot");
+  if (mode === "home") return renderHome();
+  if (mode === "analysis") return renderAnalysis();
+  if (mode === "done") return renderDone();
+  const P = PAGES[page];
+  const vp = visiblePages(), idx = vp.indexOf(page);
+  $("#prog").style.width = `${Math.round(((idx + 1) / vp.length) * 100)}%`;
+  $("#hsub").textContent = `صفحه ${toFa(idx + 1)} از ${toFa(vp.length)}`;
+  if (P.summary) {
+    const c = calc();
+    app.innerHTML = `<h2>${P.title}</h2>
+      <div class="card"><div class="muted">طبقه‌بندی خودکار بر اساس تعریف مورد</div><div class="big">${CASE_FA[c.case_status]}</div>
+      <div class="logic">calculate: case_status = if(\${ill}='yes' and (\${diarrhea_n} >= 3 or (vomiting and diarrhea)), 'case_v1', if(\${ill}='yes','case_v2','non_case'))</div></div>
+      ${c.incubation_h !== "" ? `<div class="card"><div class="muted">فاصله شام تا شروع علائم</div><div class="big">${toFa(c.incubation_h)} ساعت</div>
+      <div class="logic">calculate: incubation_h = (onset_date + onset_time) − 2026-03-05 20:00 (+03:30), in hours</div></div>` : ""}
+      <p class="muted">با زدن «ثبت»، پاسخ روی همین دستگاه ذخیره می‌شود و فرم برای نفر بعد آماده می‌شود.</p>`;
+  } else {
+    app.innerHTML = `<h2>${P.title}</h2>${P.qs.map(renderQ).join("")}`;
+  }
+  foot.innerHTML = `<button class="btn alt" id="prev">قبلی</button>${P.summary ? `<button class="btn" id="submit">ثبت</button>` : `<button class="btn" id="next">بعدی</button>`}`;
+  $("#prev").onclick = () => { const i = vp.indexOf(page); if (i > 0) { page = vp[i - 1]; render(); } else { mode = "home"; render(); } };
+  if ($("#next")) $("#next").onclick = next;
+  if ($("#submit")) $("#submit").onclick = submit;
+  bind(); applyRel();
+  window.scrollTo(0, 0);
+}
+
+function bind() {
+  const app = $("#app");
+  app.oninput = app.onchange = (e) => {
+    const el = e.target, n = el.name; if (!n) return;
+    if (el.type === "checkbox") V[n] = [...app.querySelectorAll(`input[name="${n}"]:checked`)].map((x) => x.value);
+    else if (n.startsWith("f_")) { V.foods = V.foods || {}; V.foods[n.slice(2)] = el.value; const tr = el.closest("tr"); if (tr) tr.classList.remove("missing"); }
+    else if (n === "onset_m") { V.onset_m = el.value; V.onset_d = ""; V.onset_date = ""; render(); return; }
+    else if (n === "onset_d") { V.onset_d = el.value; V.onset_date = jalaliToIso(V.onset_m, el.value); }
+    else V[n] = (el.type === "text") ? toEn(el.value) : el.value;
+    const qd = el.closest(".q"); if (qd) qd.classList.remove("invalid");
+    applyRel();
+  };
+  const g = $("#gpsbtn");
+  if (g) g.onclick = () => {
+    const m = $("#gpsmsg");
+    if (!navigator.geolocation) { m.textContent = "این دستگاه موقعیت‌یابی ندارد."; return; }
+    m.textContent = "در حال دریافت…";
+    navigator.geolocation.getCurrentPosition((p) => { V.location = { lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy) }; m.textContent = `ثبت شد: ${toFa(V.location.lat.toFixed(5))}، ${toFa(V.location.lon.toFixed(5))}`; },
+      () => { m.textContent = "دریافت نشد؛ این سؤال اختیاری است."; }, { enableHighAccuracy: true, timeout: 15000 });
+  };
+}
+
+// relevance: hide irrelevant questions and clear their values (as ODK does)
+function applyRel() {
+  for (const P of PAGES) for (const q of P.qs) {
+    const el = document.getElementById("q_" + q.name);
+    const r = isRel(q);
+    if (el) el.classList.toggle("hidden", !r);
+    if (!r) clearQ(q);
+  }
+}
+function clearQ(q) {
+  if (q.type === "foods") delete V.foods;
+  else if (q.type === "jdate") { delete V.onset_m; delete V.onset_d; delete V.onset_date; }
+  else delete V[q.name];
+}
+
+function validatePage() {
+  const P = PAGES[page]; let ok = true, first = null;
+  for (const q of P.qs) {
+    if (!isRel(q) || q.type === "note") continue;
+    let msg = "";
+    const v = V[q.name];
+    if (q.type === "foods") {
+      const miss = FOODS.filter(([k]) => !(V.foods || {})[k]);
+      document.querySelectorAll("tr[data-food]").forEach((tr) => tr.classList.toggle("missing", miss.some(([k]) => k === tr.dataset.food)));
+      if (miss.length) msg = "به همه غذاها پاسخ دهید.";
+    } else if (q.type === "jdate") {
+      if (!V.onset_date) msg = q.required ? "ماه و روز را انتخاب کنید." : "";
+    } else {
+      const empty = v === undefined || v === "" || (Array.isArray(v) && !v.length);
+      if (empty && q.required) msg = q.type.startsWith("select") ? "یک گزینه را انتخاب کنید." : "این سؤال اجباری است.";
+      else if (!empty && q.type === "integer" && !/^\d+$/.test(v)) msg = "فقط عدد صحیح وارد کنید.";
+      else if (!empty && q.con && !q.con(q.type === "integer" ? Number(v) : v)) msg = q.msg;
+    }
+    const el = document.getElementById("q_" + q.name);
+    if (msg) { ok = false; el.classList.add("invalid"); $("#e_" + q.name).textContent = msg; if (!first) first = el; }
+    else if (el) el.classList.remove("invalid");
+  }
+  if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+  return ok;
+}
+
+function next() {
+  if (!validatePage()) return;
+  if (V.consent === "no") { finish(); return; }
+  const vp = visiblePages(), i = vp.indexOf(page);
+  page = vp[Math.min(i + 1, vp.length - 1)]; render();
+}
+
+// ======================= records & CSV =======================
+const COLS = ["record_id", "start", "end", "consent", "age", "sex", "residence", "room", "latitude", "longitude", "gps_accuracy_m", "attended",
+  ...FOODS.map(([k]) => "f_" + k), "other_meal", "ill", "symptoms", ...SYMPTOMS.map(([k]) => "symptoms/" + k), "diarrhea_n",
+  "onset_date", "onset_date_jalali", "onset_time", "duration_h", "sought_care", "hospitalized", "ill_roommates", "case_status", "incubation_h"];
+
+function toRecord() {
+  const c = calc(), r = {};
+  const M = MONTHS.find((x) => x.v === V.onset_m);
+  Object.assign(r, {
+    record_id: "R" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), start: startTime, end: new Date().toISOString(),
+    consent: V.consent || "", age: V.age || "", sex: V.sex || "", residence: V.residence || "", room: V.room || "",
+    latitude: V.location ? V.location.lat : "", longitude: V.location ? V.location.lon : "", gps_accuracy_m: V.location ? V.location.acc : "",
+    attended: V.attended || "", other_meal: V.other_meal || "", ill: V.ill || "", symptoms: (V.symptoms || []).join(" "),
+    diarrhea_n: V.diarrhea_n || "", onset_date: V.onset_date || "", onset_date_jalali: M && V.onset_d ? `${toFa(V.onset_d)} ${M.t}` : "",
+    onset_time: V.onset_time || "", duration_h: V.duration_h || "", sought_care: V.sought_care || "", hospitalized: V.hospitalized || "",
+    ill_roommates: V.ill_roommates || "", case_status: c.case_status, incubation_h: c.incubation_h,
+  });
+  for (const [k] of FOODS) r["f_" + k] = (V.foods || {})[k] || "";
+  for (const [k] of SYMPTOMS) r["symptoms/" + k] = V.ill === "yes" ? ((V.symptoms || []).includes(k) ? 1 : 0) : "";
+  return r;
+}
+function finish() {
+  const arr = loadRecords(); arr.push(toRecord());
+  const ok = saveRecords(arr);
+  mode = "done"; render();
+  if (!ok) toast("ذخیره دائمی ممکن نشد؛ پیش از بستن صفحه CSV را دانلود کنید.");
+}
+function submit() { finish(); }
+
+function csvCell(v) { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
+function toCSV(rows) { return [COLS.join(","), ...rows.map((r) => COLS.map((c) => csvCell(r[c])).join(","))].join("\r\n"); }
+function download(rows, name) {
+  const blob = new Blob(["﻿" + toCSV(rows)], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function parseCSV(text) {
+  text = text.replace(/^﻿/, "");
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  const head = rows.shift() || [];
+  return rows.filter((r) => r.length > 1).map((r) => Object.fromEntries(head.map((h, i) => [h, r[i] ?? ""])));
+}
+
+// ======================= screens =======================
+function renderHome() {
+  const n = loadRecords().length;
+  $("#prog").style.width = "0"; $("#hsub").textContent = "فرم آفلاین · بدون نیاز به اینترنت";
+  $("#app").innerHTML = `
+    <h2>شام خوابگاه، ۱۴ اسفند ۱۴۰۴</h2>
+    <p>این فرم آموزشی بدون اینترنت روی هر مرورگری کار می‌کند. هر بار که فرم پر شود، پاسخ روی همین دستگاه ذخیره می‌شود. در پایان، فایل CSV را دانلود کنید و برای مدرس بفرستید.</p>
+    <div class="card"><div class="muted">پاسخ‌های ذخیره‌شده روی این دستگاه</div><div class="big">${toFa(n)}</div></div>
+    <div class="stack">
+      <button class="btn" id="new">شروع پرسشنامه جدید</button>
+      <button class="btn alt" id="dl" ${n ? "" : "disabled"}>دانلود CSV پاسخ‌ها</button>
+      <button class="btn alt" id="show" ${n ? "" : "disabled"}>نمایش متن CSV (اگر دانلود کار نکرد)</button>
+      <button class="btn alt" id="an">تحلیل داده‌ها (ویژه مدرس)</button>
+      <label class="switch"><input type="checkbox" id="teach" ${document.body.classList.contains("teach") ? "checked" : ""}> نمایش منطق XLSForm زیر هر سؤال (حالت آموزشی)</label>
+      <button class="btn warn" id="clr" ${n ? "" : "disabled"}>پاک‌کردن همه پاسخ‌های این دستگاه</button>
+    </div>
+    <div id="csvbox"></div>`;
+  $("#foot").innerHTML = "";
+  $("#new").onclick = () => { for (const k of Object.keys(V)) delete V[k]; startTime = new Date().toISOString(); page = 0; mode = "form"; render(); };
+  $("#dl").onclick = () => download(loadRecords(), `dorm_outbreak_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")}.csv`);
+  $("#show").onclick = () => { $("#csvbox").innerHTML = `<p class="muted">متن زیر را کپی کنید و در یک فایل با پسوند .csv ذخیره کنید.</p><textarea readonly>${esc(toCSV(loadRecords()))}</textarea>`; };
+  $("#an").onclick = () => { mode = "analysis"; render(); };
+  $("#teach").onchange = (e) => document.body.classList.toggle("teach", e.target.checked);
+  $("#clr").onclick = () => { if (confirm("همه پاسخ‌های ذخیره‌شده روی این دستگاه پاک شود؟ این کار برگشت‌پذیر نیست.")) { saveRecords([]); render(); } };
+}
+function renderDone() {
+  const n = loadRecords().length;
+  $("#prog").style.width = "100%"; $("#hsub").textContent = "ثبت شد";
+  $("#app").innerHTML = `<h2>از همکاری شما سپاسگزاریم</h2><div class="card">پاسخ ثبت شد. تعداد پاسخ‌های این دستگاه: <b>${toFa(n)}</b></div>`;
+  $("#foot").innerHTML = `<button class="btn" id="again">پرسشنامه بعدی</button><button class="btn alt" id="home">صفحه اصلی</button>`;
+  $("#again").onclick = () => { for (const k of Object.keys(V)) delete V[k]; startTime = new Date().toISOString(); page = 0; mode = "form"; render(); };
+  $("#home").onclick = () => { mode = "home"; render(); };
+}
+
+// ======================= analysis (instructor) =======================
+let imported = [];
+function allRows() {
+  const map = new Map();
+  for (const r of [...loadRecords(), ...imported]) if (r.record_id) map.set(r.record_id, r);
+  return [...map.values()];
+}
+function rrCI(a, n1, c, n0) {
+  if (!n1 || !n0) return null;
+  const r1 = a / n1, r0 = c / n0;
+  if (a === 0 || c === 0) return { rr: r0 ? r1 / r0 : null, lo: null, hi: null };
+  const rr = r1 / r0, se = Math.sqrt(1 / a - 1 / n1 + 1 / c - 1 / n0);
+  return { rr, lo: Math.exp(Math.log(rr) - 1.96 * se), hi: Math.exp(Math.log(rr) + 1.96 * se) };
+}
+const f2 = (x) => (x === null || x === undefined || isNaN(x) ? "—" : toFa(x.toFixed(2)));
+const pct = (a, n) => (n ? toFa(Math.round((a / n) * 100)) + "٪" : "—");
+
+function renderAnalysis() {
+  const rows = allRows().filter((r) => r.consent === "yes");
+  const att = rows.filter((r) => r.attended === "yes");
+  const isCase = (r) => r.case_status === "case_v1" || r.case_status === "case_v2";
+  const cases = att.filter(isCase).length;
+  const tbl = FOODS.map(([k, t]) => {
+    const ate = att.filter((r) => r["f_" + k] === "yes"), no = att.filter((r) => r["f_" + k] === "no");
+    const a = ate.filter(isCase).length, c = no.filter(isCase).length;
+    return { k, t, a, n1: ate.length, c, n0: no.length, ...(rrCI(a, ate.length, c, no.length) || {}) };
+  });
+  const best = tbl.filter((x) => x.lo > 1).sort((x, y) => y.rr - x.rr)[0];
+  const inc = att.filter((r) => r.incubation_h !== "" && !isNaN(Number(r.incubation_h))).map((r) => Number(r.incubation_h));
+  const bins = Array.from({ length: 14 }, (_, i) => i * 6); // 0..84h in 6h bins
+  const counts = bins.map((b) => inc.filter((h) => h >= b && h < b + 6).length);
+  const mx = Math.max(1, ...counts);
+  const med = inc.length ? [...inc].sort((a, b) => a - b)[Math.floor((inc.length - 1) / 2)] : null;
+  $("#prog").style.width = "0"; $("#hsub").textContent = "تحلیل داده‌ها";
+  $("#app").innerHTML = `
+    <h2>تحلیل داده‌ها</h2>
+    <div class="card">
+      <div class="muted">فایل‌های CSV دانشجوها را اینجا اضافه کنید (چند فایل با هم). پاسخ‌های تکراری حذف می‌شوند.</div>
+      <div class="row" style="margin-top:8px"><input type="file" id="files" accept=".csv,text/csv" multiple>
+      <button class="btn alt" id="demo">افزودن ۴۰ پاسخ نمونه</button></div>
+    </div>
+    <div class="card"><span class="pill">${toFa(rows.length)} پاسخ‌دهنده</span> <span class="pill">${toFa(att.length)} حاضر در شام</span> <span class="pill">${toFa(cases)} مورد در حاضران</span>
+      <div style="margin-top:6px">میزان حمله کلی در حاضران: <b>${pct(cases, att.length)}</b></div></div>
+    <h2>میزان حمله به تفکیک غذا</h2>
+    <p class="muted">فقط حاضران در شام؛ «یادم نیست» کنار گذاشته شده است. مورد = تعریف ۱ یا ۲.</p>
+    <div class="scroll"><table class="ar"><thead><tr><th>غذا</th><th>خورده: مورد/کل</th><th>میزان حمله</th><th>نخورده: مورد/کل</th><th>میزان حمله</th><th>RR</th><th>فاصله اطمینان ۹۵٪</th></tr></thead>
+    <tbody>${tbl.map((x) => `<tr class="${best && best.k === x.k ? "top" : ""}"><td>${x.t}</td><td>${toFa(x.a)}/${toFa(x.n1)}</td><td>${pct(x.a, x.n1)}</td><td>${toFa(x.c)}/${toFa(x.n0)}</td><td>${pct(x.c, x.n0)}</td><td>${f2(x.rr)}</td><td>${x.lo ? f2(x.lo) + " تا " + f2(x.hi) : "—"}</td></tr>`).join("")}</tbody></table></div>
+    ${best ? `<p>بیشترین خطر نسبی معنی‌دار: <b>${best.t}</b> (RR = ${f2(best.rr)}). آیا این یعنی علت پیدا شد؟ درباره درصد مواردی که این غذا را نخورده بودند هم فکر کنید.</p>` : `<p class="muted">هنوز داده کافی نیست.</p>`}
+    <h2>فاصله شام تا شروع علائم (بازه‌های ۶ ساعته)</h2>
+    ${inc.length ? `<div class="hist">${counts.map((c) => `<div style="height:${(c / mx) * 100}%">${c ? `<b>${c}</b>` : ""}</div>`).join("")}</div>
+      <div class="hx">${bins.map((b) => `<span>${b}</span>`).join("")}</div>
+      <p class="muted">محور افقی: ساعت پس از شام. میانه: ${toFa(med)} ساعت (${toFa(inc.length)} مورد با ساعت ثبت‌شده).</p>` : `<p class="muted">موردی با ساعت شروع ثبت‌شده وجود ندارد.</p>`}
+    <div class="stack" style="margin-top:12px"><button class="btn alt" id="dlall">دانلود CSV یکپارچه همه پاسخ‌ها</button></div>`;
+  $("#foot").innerHTML = `<button class="btn alt" id="home">صفحه اصلی</button>`;
+  $("#home").onclick = () => { mode = "home"; render(); };
+  $("#dlall").onclick = () => download(allRows(), "dorm_outbreak_merged.csv");
+  $("#files").onchange = async (e) => {
+    let added = 0;
+    for (const f of e.target.files) { try { const rs = parseCSV(await f.text()); imported.push(...rs); added += rs.length; } catch (err) { toast("خواندن یکی از فایل‌ها ممکن نشد."); } }
+    toast(`${toFa(added)} ردیف اضافه شد`); render();
+  };
+  $("#demo").onclick = () => { imported.push(...demoRows(40)); toast("۴۰ پاسخ نمونه اضافه شد"); render(); };
+}
+
+// synthetic class data: the Shirazi salad is the vehicle (attack rate ~60% vs ~12%)
+function demoRows(n) {
+  const out = [];
+  const rnd = (p) => Math.random() < p;
+  for (let i = 0; i < n; i++) {
+    const attended = rnd(0.88) ? "yes" : "no";
+    const foods = {}; for (const [k] of FOODS) foods[k] = attended === "yes" ? (rnd(0.06) ? "dk" : rnd(k === "rice" ? 0.95 : 0.6) ? "yes" : "no") : "";
+    const pIll = attended !== "yes" ? 0.05 : foods.salad === "yes" ? 0.62 : 0.12;
+    const ill = rnd(pIll) ? "yes" : "no";
+    const sym = ill === "yes" ? SYMPTOMS.map(([k]) => k).filter((k) => rnd({ diarrhea: 0.85, vomiting: 0.7, nausea: 0.8, cramps: 0.6, fever: 0.35, headache: 0.4, bloody: 0.02 }[k])) : [];
+    if (ill === "yes" && !sym.includes("diarrhea") && !sym.includes("vomiting")) sym.push("vomiting");
+    let onset = "", time = "", inc = "";
+    if (ill === "yes") {
+      const z = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+      const h = attended === "yes" ? Math.exp(Math.log(33) + 0.3 * z) : 40 + Math.random() * 100;
+      const t = new Date(Date.parse("2026-03-05T20:00:00+03:30") + h * 3600000 + 3.5 * 3600000);
+      onset = t.toISOString().slice(0, 10); time = t.toISOString().slice(11, 16);
+      inc = attended === "yes" ? Math.round(h * 10) / 10 : "";
+    }
+    const dn = sym.includes("diarrhea") ? 1 + Math.floor(Math.random() * 7) : "";
+    const status = ill === "yes" ? ((Number(dn) || 0) >= 3 || (sym.includes("vomiting") && sym.includes("diarrhea")) ? "case_v1" : "case_v2") : "non_case";
+    const r = { record_id: "DEMO" + i + Math.random().toString(36).slice(2, 6), consent: "yes", age: 19 + Math.floor(Math.random() * 9), sex: rnd(0.6) ? "male" : "female",
+      residence: rnd(0.65) ? "dorm_a" : "dorm_b", attended, ill, symptoms: sym.join(" "), diarrhea_n: dn, onset_date: onset, onset_time: time, case_status: status, incubation_h: inc };
+    for (const [k] of FOODS) r["f_" + k] = foods[k];
+    for (const [k] of SYMPTOMS) r["symptoms/" + k] = ill === "yes" ? (sym.includes(k) ? 1 : 0) : "";
+    out.push(r);
+  }
+  return out;
+}
+
+render();
+</script>
+</body>
+</html>
