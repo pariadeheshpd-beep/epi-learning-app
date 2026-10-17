@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { EpiCurveLab, DetectionLab, AttackRateLab, OutbreakResources } from "./OutbreakLab.jsx";
+import { EpiCurveLab, DetectionLab, AttackRateLab, OutbreakResources, RCodeLab } from "./OutbreakLab.jsx";
 
 /* ============================================================
    DESIGN TOKENS
@@ -1005,6 +1005,7 @@ function OutbreakTopic({ onBack }) {
       <OutbreakCurveQuiz />
       <OutbreakStepsOrdering />
       <EpiCurveLab />
+      <RCodeLab />
       <AttackRateLab />
       <DetectionLab />
       <OutbreakResources />

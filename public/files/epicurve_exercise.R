@@ -14,7 +14,7 @@
 #              Nowruz holidays 2026-03-20..24, 2026-04-01..02
 ###############################################################################
 
-SAVE_PLOTS <- TRUE          # TRUE = also save every plot as PNG in ./figures
+SAVE_PLOTS <- FALSE         # TRUE = also save every plot as PNG in ./figures
 if (SAVE_PLOTS) dir.create("figures", showWarnings = FALSE)
 open_plot <- function(name, w = 1000, h = 550) {
   if (SAVE_PLOTS) png(file.path("figures", paste0(name, ".png")), width = w, height = h, res = 110)

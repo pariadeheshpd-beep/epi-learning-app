@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import RSCRIPT from "./assets/epicurve_exercise.R?raw";
 
 /* ============================================================
    Outbreak lab: interactive exercises for the outbreak module
@@ -441,6 +442,103 @@ export function OutbreakResources() {
         ))}
       </div>
       <p style={{ fontSize: 12, color: MUTED, margin: "10px 0 0" }}>همه داده‌ها ساختگی و برای آموزش‌اند.</p>
+    </Card>
+  );
+}
+
+/* ============================================================
+   5. R code, step by step (same script as the download)
+============================================================ */
+
+const R_NOTES = [
+  ["آماده‌سازی", "خواندن داده و تعریف تاریخ‌های کلیدی سناریو. فقط R پایه لازم است و نیازی به نصب بسته نیست. اگر SAVE_PLOTS را TRUE کنید، همه نمودارها در پوشه figures هم ذخیره می‌شوند."],
+  ["گام ۱: پاک‌سازی پیش از رسم", "پیش از هر منحنی، تاریخ‌های ناممکن، تاریخ شروع بعد از گزارش، تاریخ گمشده و گزارش تکراری یک نفر را پیدا کنید. هر اصلاح را با دلیل یادداشت کنید."],
+  ["گام ۲: یک داده، سه بازه", "همان داده با بازه روزانه، هفتگی و ۶ ساعته رسم می‌شود. نمای هفتگی منبع مشترک را پنهان می‌کند."],
+  ["گام ۳: برآورد زمان مواجهه", "از اولین، میانه و آخرین مورد، با حداقل، میانه و حداکثر دوره کمون، زمان مواجهه را به عقب حساب کنید."],
+  ["گام ۴: موارد ناهمخوان", "مواردی که پیش از شام شروع شده‌اند: نویز زمینه‌ای یا منبع طغیان؟"],
+  ["گام ۵: الگوی طغیان", "منحنی لایه‌بندی‌شده بر اساس حضور در شام و محل سکونت؛ منبع مشترک و سپس انتشار فرد به فرد."],
+  ["گام ۶: تاریخ شروع در برابر تاریخ گزارش", "اثر جمعه، نوروز، بیماریابی فعال و تغییر تعریف مورد روی منحنی گزارش."],
+  ["گام ۷: آیا طغیان تمام شده است؟", "مقایسه برداشت ۴ فروردین با ۱۸ فروردین و یک nowcast ساده با توزیع تأخیر گزارش."],
+  ["گام ۸: سرعت فروکش", "رگرسیون پواسون روی دوره نزولی؛ نرخ رشد روزانه و زمان نصف‌شدن موارد."],
+  ["گام ۹: عدد تولید مثل لحظه‌ای (Rt)", "روش Cori با R پایه؛ موارد شام «وارداتی» حساب می‌شوند. مقایسه با حالتی که منبع مشترک نادیده گرفته شود."],
+  ["گام ۱۰: گزارش یک‌دقیقه‌ای", "بدون کد: با نمودارهای خود به معاون بهداشت بگویید چه شد، کجای طغیان هستیم و چه چیزی نامطمئن است."],
+];
+
+function splitScript(text) {
+  const lines = text.replace(/\r/g, "").split("\n");
+  const idx = lines.map((l, i) => (/^# STEP \d+/.test(l) ? i : -1)).filter((i) => i >= 0);
+  const trim = (arr) => arr.filter((l) => !/^#{20,}\s*$/.test(l)).join("\n").replace(/^\n+|\n+$/g, "");
+  const parts = [trim(lines.slice(0, idx[0]))];
+  idx.forEach((s, k) => {
+    const end = k + 1 < idx.length ? idx[k + 1] : lines.length;
+    parts.push(trim(lines.slice(s + 1, end)));
+  });
+  return parts;
+}
+
+function CodeBlock({ code }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch (e) { setCopied(false); }
+  };
+  return (
+    <div style={{ position: "relative", marginTop: 8, minWidth: 0 }}>
+      <button
+        onClick={copy}
+        style={{ position: "absolute", top: 6, left: 6, background: copied ? TEAL : "#2C3E54", color: PAPER, border: "none", borderRadius: 6, padding: "3px 10px", fontFamily: FONT, fontSize: 11.5, cursor: "pointer" }}
+      >
+        {copied ? "کپی شد" : "کپی"}
+      </button>
+      <pre
+        dir="ltr"
+        style={{ margin: 0, background: NAVY, color: "#E8E4DA", borderRadius: 10, padding: "34px 12px 12px", fontFamily: "'Courier New', Consolas, monospace", fontSize: 12, lineHeight: 1.55, overflowX: "auto", textAlign: "left", maxHeight: 420 }}
+      >
+        {code}
+      </pre>
+    </div>
+  );
+}
+
+export function RCodeLab() {
+  const parts = useMemo(() => splitScript(RSCRIPT), []);
+  const [open, setOpen] = useState(1);
+  return (
+    <Card>
+      <h3 style={{ margin: "0 0 6px", fontSize: 15.5, fontWeight: 700, color: NAVY }}>کد R تمرین منحنی اپیدمی، گام‌به‌گام</h3>
+      <p style={{ fontSize: 13.5, lineHeight: 2, color: "#4A4437", margin: "0 0 10px" }}>
+        اسکریپت و دو فایل داده را در یک پوشه بگذارید، در RStudio همان پوشه را working directory کنید (Session → Set Working Directory)
+        و هر گام را جدا اجرا کنید. پیش از رفتن به گام بعد، به سؤال آن گام پاسخ دهید.
+      </p>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {[["epicurve_exercise.R", "اسکریپت کامل"], ["linelist_extract_1405-01-04.csv", "داده ۴ فروردین"], ["linelist_update_1405-01-18.csv", "داده ۱۸ فروردین"]].map(([f, t]) => (
+          <a key={f} href={`/files/${f}`} download style={{ fontSize: 12.5, color: NAVY, background: PAPER, border: `1px solid ${LINE}`, borderRadius: 999, padding: "5px 12px", textDecoration: "none" }}>
+            ↓ {t}
+          </a>
+        ))}
+      </div>
+      <div style={{ display: "grid", gap: 8 }}>
+        {parts.map((code, i) => {
+          const [title, note] = R_NOTES[i] || [`بخش ${fa(i)}`, ""];
+          const isOpen = open === i;
+          return (
+            <div key={i} style={{ border: `1px solid ${LINE}`, borderRadius: 10, background: isOpen ? "#FFFFFF" : PAPER, minWidth: 0 }}>
+              <button
+                onClick={() => setOpen(isOpen ? -1 : i)}
+                style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "10px 14px", fontFamily: FONT, fontSize: 13.5, fontWeight: 700, color: NAVY, cursor: "pointer", textAlign: "right" }}
+              >
+                <span>{title}</span>
+                <span style={{ color: OCHRE }}>{isOpen ? "−" : "+"}</span>
+              </button>
+              {isOpen && (
+                <div style={{ padding: "0 14px 14px", minWidth: 0 }}>
+                  <div style={{ fontSize: 13, lineHeight: 2, color: "#4A4437" }}>{note}</div>
+                  <CodeBlock code={code} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }
