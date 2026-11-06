@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { EpiCurveLab, DetectionLab, AttackRateLab, OutbreakResources, RCodeLab } from "./OutbreakLab.jsx";
+import { SampleSizeCalculator, PowerLab, SampleSizeQuiz, SampleSizeConcepts, SampleSizeResources } from "./SampleSizeLab.jsx";
 
 /* ============================================================
    DESIGN TOKENS
@@ -1013,6 +1014,25 @@ function OutbreakTopic({ onBack }) {
   );
 }
 
+/* ---------------- Topic 7: Sample size ---------------- */
+
+function SampleSizeTopic({ onBack }) {
+  return (
+    <TopicShell
+      eyebrow="محاسبه‌گر"
+      title="تعیین حجم نمونه و توان آزمون"
+      intro="حجم نمونه باید آن‌قدر بزرگ باشد که اثر مهم را کشف کند و آن‌قدر کوچک که منابع و افراد بی‌دلیل درگیر نشوند. در این ماژول فرمول‌های اصلی را با اعداد خودتان اجرا می‌کنید، رابطه α، β و توان را می‌بینید و متن آماده پروپوزال می‌گیرید."
+      onBack={onBack}
+    >
+      <SampleSizeConcepts />
+      <SampleSizeCalculator />
+      <PowerLab />
+      <SampleSizeQuiz />
+      <SampleSizeResources />
+    </TopicShell>
+  );
+}
+
 /* ---------------- Home ---------------- */
 
 const TOPICS = [
@@ -1022,6 +1042,7 @@ const TOPICS = [
   { id: "measures", title: "اندازه‌های ارتباط", desc: "محاسبه‌گر زنده‌ی RR، OR، RD و AR٪ از جدول ۲×۲", tag: "محاسبه‌گر" },
   { id: "designs", title: "انواع مطالعات و طراحی پژوهش", desc: "سناریوهای واقعی بخوانید و نوع طراحی مطالعه را تشخیص دهید", tag: "سناریومحور" },
   { id: "outbreak", title: "طغیان‌ها و بررسی اپیدمی", desc: "نوع منحنی، مراحل بررسی، آزمایشگاه منحنی اپیدمی، میزان حمله غذایی و کشف زودهنگام", tag: "سناریومحور" },
+  { id: "samplesize", title: "تعیین حجم نمونه و توان آزمون", desc: "۹ فرمول با جایگذاری گام‌به‌گام، آزمایشگاه توان، متن آماده پروپوزال و ماشین‌حساب اکسل", tag: "محاسبه‌گر" },
 ];
 
 function Home({ onOpen }) {
@@ -1080,5 +1101,6 @@ export default function EpiLearningApp() {
   if (view === "measures") return <MeasuresTopic onBack={() => setView("home")} />;
   if (view === "designs") return <StudyDesignsTopic onBack={() => setView("home")} />;
   if (view === "outbreak") return <OutbreakTopic onBack={() => setView("home")} />;
+  if (view === "samplesize") return <SampleSizeTopic onBack={() => setView("home")} />;
   return <Home onOpen={setView} />;
 }
