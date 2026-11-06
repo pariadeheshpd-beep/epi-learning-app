@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { EpiCurveLab, DetectionLab, AttackRateLab, OutbreakResources, RCodeLab } from "./OutbreakLab.jsx";
 import { SampleSizeCalculator, PowerLab, SampleSizeQuiz, SampleSizeConcepts, SampleSizeResources } from "./SampleSizeLab.jsx";
+import { TestChooser, TestCalculators, StatConcepts, CheatSheet, StatQuiz } from "./StatTestsLab.jsx";
 
 /* ============================================================
    DESIGN TOKENS
@@ -1033,6 +1034,25 @@ function SampleSizeTopic({ onBack }) {
   );
 }
 
+/* ---------------- Topic 8: Statistical tests ---------------- */
+
+function StatTestsTopic({ onBack }) {
+  return (
+    <TopicShell
+      eyebrow="محاسبه‌گر"
+      title="آزمون‌های آماری: انتخاب، اجرا و تفسیر"
+      intro="انتخاب آزمون به هدف تحلیل، نوع متغیر پیامد، تعداد گروه‌ها و مستقل یا وابسته بودن داده‌ها بستگی دارد. در این ماژول آزمون مناسب را گام‌به‌گام پیدا می‌کنید، آن را روی داده‌های خلاصه اجرا می‌کنید و یاد می‌گیرید نتیجه را چگونه گزارش کنید."
+      onBack={onBack}
+    >
+      <TestChooser />
+      <StatConcepts />
+      <TestCalculators />
+      <CheatSheet />
+      <StatQuiz />
+    </TopicShell>
+  );
+}
+
 /* ---------------- Home ---------------- */
 
 const TOPICS = [
@@ -1042,6 +1062,7 @@ const TOPICS = [
   { id: "measures", title: "اندازه‌های ارتباط", desc: "محاسبه‌گر زنده‌ی RR، OR، RD و AR٪ از جدول ۲×۲", tag: "محاسبه‌گر" },
   { id: "designs", title: "انواع مطالعات و طراحی پژوهش", desc: "سناریوهای واقعی بخوانید و نوع طراحی مطالعه را تشخیص دهید", tag: "سناریومحور" },
   { id: "outbreak", title: "طغیان‌ها و بررسی اپیدمی", desc: "نوع منحنی، مراحل بررسی، آزمایشگاه منحنی اپیدمی، میزان حمله غذایی و کشف زودهنگام", tag: "سناریومحور" },
+  { id: "stattests", title: "آزمون‌های آماری", desc: "راهنمای انتخاب آزمون، محاسبه‌گر t، ANOVA، کای‌دو و فیشر، همبستگی و تفسیر نتایج", tag: "محاسبه‌گر" },
   { id: "samplesize", title: "تعیین حجم نمونه و توان آزمون", desc: "۹ فرمول با جایگذاری گام‌به‌گام، آزمایشگاه توان، متن آماده پروپوزال و ماشین‌حساب اکسل", tag: "محاسبه‌گر" },
 ];
 
@@ -1101,6 +1122,7 @@ export default function EpiLearningApp() {
   if (view === "measures") return <MeasuresTopic onBack={() => setView("home")} />;
   if (view === "designs") return <StudyDesignsTopic onBack={() => setView("home")} />;
   if (view === "outbreak") return <OutbreakTopic onBack={() => setView("home")} />;
+  if (view === "stattests") return <StatTestsTopic onBack={() => setView("home")} />;
   if (view === "samplesize") return <SampleSizeTopic onBack={() => setView("home")} />;
   return <Home onOpen={setView} />;
 }

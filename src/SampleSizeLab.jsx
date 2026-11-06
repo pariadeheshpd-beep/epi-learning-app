@@ -108,7 +108,7 @@ function Field({ label, value, onChange, step = 1, min, max, suffix, hint, optio
           max={max}
           onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
           style={{
-            width: "100%", minWidth: 0, padding: "7px 8px", border: "1.5px solid #D8D1C0", borderRadius: 8,
+            width: "100%", boxSizing: "border-box", minWidth: 0, padding: "7px 8px", border: "1.5px solid #D8D1C0", borderRadius: 8,
             fontSize: 15, fontFamily: FONT, color: NAVY, background: "#FFFDF6", textAlign: "center", direction: "ltr",
           }}
         />
